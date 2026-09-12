@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Added
+
+- **Per-attempt agent spend and `budget.maxCostUsd`.** The harness now reads
+  what the agent CLI reports on its stream (Claude's `result` event:
+  `total_cost_usd`, token counts, turns; Codex: tokens per turn) and shows it
+  on every attempt line — `Attempt 3 FAILED — 2 open, 3 fixed · $1.42 this
+  attempt, $4.10 so far, budget $5.00` — in `reports/report.json` under
+  `cost`, in `status.json`, in the run notes and in the outro. A recipe may set
+  `budget: { maxCostUsd }`; once reported spend reaches it the loop stops
+  (`Run STOPPED (budget)`, a `budget_exhausted` log event) instead of paying
+  for another repair. Silence is never $0: when the agent reports no usage the
+  harness prints `cost unknown` and says the budget cannot be enforced. One
+  budget covers all increments of a kick.
+
 ### Fixed
 
 - **The last line an agent prints is parsed before the run is reported
