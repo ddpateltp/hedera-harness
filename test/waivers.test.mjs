@@ -72,6 +72,19 @@ test("patterns match exactly or by prefix wildcard", () => {
   assert.equal(waiverMatches("playwright:route:*:console", "playwright:route:home:render"), false);
   assert.equal(waiverMatches("json:package.json:*", "json:package.json:name"), true);
   assert.equal(waiverMatches("text:a.md:needle (x)", "text:a.md:needle (x)"), true, "regex characters are literal");
+  assert.equal(waiverMatches("json:*:name", "json:a:b:name"), true);
+  assert.equal(waiverMatches("json:*:name", "json:a:b:names"), false);
+  assert.equal(waiverMatches("a*", "a"), true);
+  assert.equal(waiverMatches("a**b", "axxb"), true);
+
+  // The pattern is user input from a file; matching must stay linear-ish even
+  // when someone writes a wildcard between every character against a long id.
+  const hostile = `x:${"*a".repeat(40)}*`;
+  const longId = `x:${"a".repeat(2000)}b`;
+  const started = Date.now();
+  assert.equal(waiverMatches(hostile, longId), true);
+  assert.equal(waiverMatches(`${hostile}c`, longId), false);
+  assert.ok(Date.now() - started < 500, "no catastrophic backtracking");
 });
 
 // ---------------------------------------------------------------- applying

@@ -96,10 +96,37 @@ function assertWaivablePattern(pattern: string, where: string): void {
   }
 }
 
+/**
+ * `*` matches any run of characters; everything else is literal. Written as a
+ * two-cursor walk rather than a RegExp: the pattern comes from a file in the
+ * project, and a regular expression built from it could be made to backtrack
+ * for a long time on a crafted id.
+ */
 export function waiverMatches(pattern: string, id: string): boolean {
   if (!pattern.includes("*")) return pattern === id;
-  const escaped = pattern.split("*").map(part => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  return new RegExp(`^${escaped.join(".*")}$`).test(id);
+
+  let p = 0;
+  let i = 0;
+  let starAt = -1;
+  let resumeAt = 0;
+  while (i < id.length) {
+    if (p < pattern.length && pattern[p] === "*") {
+      starAt = p;
+      resumeAt = i;
+      p += 1;
+    } else if (p < pattern.length && pattern[p] === id[i]) {
+      p += 1;
+      i += 1;
+    } else if (starAt >= 0) {
+      p = starAt + 1;
+      resumeAt += 1;
+      i = resumeAt;
+    } else {
+      return false;
+    }
+  }
+  while (p < pattern.length && pattern[p] === "*") p += 1;
+  return p === pattern.length;
 }
 
 /** Waivers whose end date is before today (a waiver is valid through its `expires` day). */
