@@ -136,12 +136,18 @@ export async function recordAttemptResult(input: {
     : validation.passed
       ? (validation.playwrightGate
           ? `playwright gate passed (${validation.playwrightGate.routes.length} routes)`
-          : "deterministic gates passed")
+          : "deterministic gates passed") + waivedSuffix(delta)
       : formatFindingDelta(delta);
 
   console.log(
     `[hedera-harness] Attempt ${attempt} ${validation.passed ? "PASSED" : "FAILED"} — ${summary}`,
   );
+}
+
+/** A green attempt still says what a person accepted to get there. */
+function waivedSuffix(delta: FindingDelta): string {
+  const waived = delta.waived ?? [];
+  return waived.length > 0 ? `, ${waived.length} waived` : "";
 }
 
 export async function abortOnInfrastructureFailure(input: {
