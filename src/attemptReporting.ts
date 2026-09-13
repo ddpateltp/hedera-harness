@@ -112,6 +112,7 @@ export async function recordAttemptResult(input: {
     openFindingIds: delta.open,
     fixedFindingIds: delta.fixed,
     introducedFindingIds: delta.introduced,
+    waivedFindingIds: delta.waived,
   });
 
   await writeStatusFile(layout.runDirectory, {
@@ -121,6 +122,7 @@ export async function recordAttemptResult(input: {
     findingCount: delta.open.length,
     openFindingIds: delta.open,
     fixedFindingIds: delta.fixed,
+    waivedFindingIds: delta.waived,
     evaluationPassed: validation.evaluation?.passed,
     infrastructureFailure: validation.evaluation?.infrastructureFailure ?? false,
   });
@@ -230,6 +232,7 @@ export async function finishRun(input: {
     passed: validation.passed,
     openFindingIds: delta.open,
     fixedFindingIds: delta.fixed,
+    waivedFindingIds: delta.waived,
     startedAt: input.startedAt.toISOString(),
     finishedAt: finishedAt.toISOString(),
     durationMs: finishedAt.getTime() - input.startedAt.getTime(),
